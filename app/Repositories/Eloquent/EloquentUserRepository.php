@@ -1,9 +1,11 @@
 <?php
+namespace App\Repositories\Eloquent;
 
-namespace App\Repositories;
-
+use App\Models\Role;
 use App\Models\User;
+use App\Repositories\Contracts\UserRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Hash;
 
 class EloquentUserRepository implements UserRepositoryInterface
 {
@@ -26,11 +28,20 @@ class EloquentUserRepository implements UserRepositoryInterface
 
     public function create(array $data): User
     {
-        return $this->model->create($data);
+        if (isset($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        }
+
+        $user = $this->model->create($data);
+        return $user;
     }
 
     public function update($id, array $data): ?User
     {
+        if (isset($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        }
+
         $user = $this->model->find($id);
         if ($user) {
             $user->update($data);
@@ -51,5 +62,12 @@ class EloquentUserRepository implements UserRepositoryInterface
     public function findByEmail($email): ?User
     {
         return $this->model->where('email', $email)->first();
+    }
+
+    public function assignRole($userId, $roleName)
+    {
+        $user = User::findOrFail($userId);
+        $role = Role::where('name',$roleName)->first();
+        $user->roles()->attach($role);
     }
 }

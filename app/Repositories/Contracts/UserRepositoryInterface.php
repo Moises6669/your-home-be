@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Contracts;
 
-use App\Models\Role;
+use App\Models\User;
 
-interface RoleRepositoryInterface
+interface UserRepositoryInterface
 {
     public function all();
     public function find($id);
     public function create(array $data);
     public function update($id, array $data);
     public function delete($id);
+    public function findByEmail($email);
+    public function assignRole($userId,$roleName);
 }
