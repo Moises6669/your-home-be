@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Eloquent;
 
 use App\Models\Role;
+use App\Repositories\Contracts\RoleRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 
 class EloquentRoleRepository implements RoleRepositoryInterface
@@ -21,6 +22,11 @@ class EloquentRoleRepository implements RoleRepositoryInterface
     public function find($id): ?Role
     {
         return $this->model->find($id);
+    }
+
+    public function findByName(string $roleName)
+    {
+        return $this->model->where('role_name', $roleName)->first();
     }
 
     public function create(array $data): Role
