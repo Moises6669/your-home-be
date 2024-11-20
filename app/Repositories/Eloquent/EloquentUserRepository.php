@@ -64,6 +64,11 @@ class EloquentUserRepository implements UserRepositoryInterface
         return $this->model->where('email', $email)->first();
     }
 
+    public function attachProfileImage(User $user, array $imageData)
+    {
+        return $user->profileImage()->create($imageData);
+    }
+
     public function assignRole($userId, $roleName)
     {
         $user = User::findOrFail($userId);

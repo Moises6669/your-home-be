@@ -13,4 +13,5 @@ interface UserRepositoryInterface
     public function delete($id);
     public function findByEmail($email);
     public function assignRole($userId,$roleName);
+    public function attachProfileImage(User $user,array $imageData);
 }

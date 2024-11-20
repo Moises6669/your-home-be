@@ -23,7 +23,6 @@ return new class extends Migration
             $table->boolean('activate')->default(false);
             $table->boolean('verified')->default(false);
             $table->string('provider')->nullable();
-            $table->string('photo_url')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
