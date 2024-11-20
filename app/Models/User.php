@@ -28,7 +28,6 @@ class User extends Authenticatable
         'activate',
         'verified',
         'provider',
-        'photo_url'
     ];
 
     /**
@@ -57,5 +56,10 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class);
+    }
+
+    public function profileImage()
+    {
+        return $this->morphOne(Image::class, 'imageable')->where('type', 'profile');
     }
 }
