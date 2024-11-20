@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Repositories\Contracts\RoleRepositoryInterface;
 use App\Repositories\Contracts\UserRepositoryInterface;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+
 
 class UserService implements UserServiceInterface
 {
@@ -31,14 +33,28 @@ class UserService implements UserServiceInterface
         return $this->userRepository->find($id);
     }
 
-    public function createUser(array $data)
+    public function createUser(array $data, $photo = null)
     {
+        // Hash del password y valores por defecto
         $data['activate'] = true;
         $data['verified'] = false;
+
         $user = $this->userRepository->create($data);
 
-        $regularRole = $this->roleRepository->find('regular_user');
+        if ($photo) {
+            $uploadResult = Cloudinary::upload($photo->getRealPath(), [
+                'folder' => 'users_photos',
+                'public_id' => $data['username'],
+                'overwrite' => true,
+            ]);
 
+            $this->userRepository->attachProfileImage($user, [
+                'url' => $uploadResult->getSecurePath(),
+                'public_id' => $uploadResult->getPublicId(),
+            ]);
+        }
+
+        $regularRole = $this->roleRepository->findByName('regular_user');
         if ($regularRole) {
             $user->roles()->attach($regularRole->id);
         }
@@ -61,7 +77,7 @@ class UserService implements UserServiceInterface
         return $this->userRepository->findByEmail($email);
     }
 
-    public function register(array $data):array
+    public function register(array $data): array
     {
         $user = $this->userRepository->create($data);
         $token = $user->createToken('auth_token')->aplainTextToken;
@@ -72,7 +88,7 @@ class UserService implements UserServiceInterface
         ];
     }
 
-    public function login(array $data):array
+    public function login(array $data): array
     {
         if (!Auth::attempt($data)) {
             return ['message' => 'Invalid login details'];

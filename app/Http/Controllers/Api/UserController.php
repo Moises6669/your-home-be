@@ -18,24 +18,29 @@ class UserController extends Controller
     public function index() {
         return response()->json($this->userService->getAllUsers);
     }
+    public function store(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'username' => 'required|string|max:50|unique:users,username',
+                'name' => 'required|string|max:100',
+                'lastname' => 'required|string|max:100',
+                'phone' => 'required|string|max:15|unique:users,phone',
+                'email' => 'required|email|max:100|unique:users,email',
+                'password' => 'required|string|min:8',
+                // 'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            ]);
+            $user = $this->userService->createUser($validated, $request->file('photo'));
 
-    public function store(Request $request):object {
+            return response()->json([
+                'message' => 'User created successfully',
+                'user' => $user,
+            ], 201);
 
-        $validated = $request->validate([
-            'username' => 'required|string|max:50|unique:users,username',
-            'name' => 'required|string|max:100',
-            'lastname' => 'required|string|max:100',
-            'phone' => 'required|string|max:15|unique:users,phone',
-            'email' => 'required|email|max:100|unique:users,email',
-            'password' => 'required|string|min:8',
-        ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
 
-        $user = $this->userService->createUser($validated);
-
-        return response()->json([
-            'message' => 'User created successfully',
-            'user' => $user,
-        ], 201);
-
+        return response()->json(['message' => 'Validation passed'], 200);
     }
 }
